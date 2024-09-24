@@ -1,0 +1,13 @@
+name: poc_faker
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - faker
+  - pyarrow
+  - pandas
+  - pyyaml
+  - snowflake-snowpark-python
+  - pip
+  - pip:
+    - "snowflake-connector-python[secure-local-storage,pandas]"
