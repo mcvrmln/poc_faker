@@ -46,6 +46,9 @@ def make_detail_record() -> str:
     customer_email = make_fixed_lenght_field(fake.email(), 80)
     customer_city = make_fixed_lenght_field(fake.city(), 50)
     customer_country = make_fixed_lenght_field(fake.country(), 40)
+    registration_date = make_fixed_lenght_field(
+        fake.date_between(date(2012, 1, 1), date.today()), 8
+    )
 
     return (
         record_type
@@ -54,6 +57,7 @@ def make_detail_record() -> str:
         + customer_email
         + customer_city
         + customer_country
+        + registration_date
     )
 
 
