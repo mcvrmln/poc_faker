@@ -4,9 +4,16 @@ from typing import Any
 from faker import Faker
 from datetime import date, datetime
 import pydantic
+import pandas as pd
+import uuid
+
+from new_file import NUMBER_OF_ROWS
 
 
 INPUT_FILE = "./data/input/testfile.txt"
+OUTPUT_FOLDER = "./data/output/"
+ERROR_FILE = "./data/output/error_files/error_file.txt"
+NUMBER_OF_ROWS = 1_000_000
 
 
 class InvalidRegistrationDateError(Exception):
@@ -51,9 +58,27 @@ def read_file(filepath: str):
             yield line
 
 
-def main() -> None:
-    dataset = None
+def save_dataset(dataset: list[pydantic.BaseModel]) -> None:
+    filename = f"{OUTPUT_FOLDER}{uuid.uuid4()}.csv"
+    df = pd.DataFrame([model.model_dump() for model in dataset])
+    df.to_csv(
+        filename,
+        sep=";",
+        header=True,
+        index=False,
+    )
 
+
+def save_error(line: str) -> None:
+    with open(ERROR_FILE, "a") as file:
+        file.write(line)
+
+
+def main() -> None:
+    dataset = []
+    print(
+        f"Start of the extract process: {datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')}"
+    )
     for line in read_file(INPUT_FILE):
         if line[0:1] == "1":
             header = {
@@ -62,7 +87,6 @@ def main() -> None:
                 "dataset": line[9:24].strip(),
                 "random_number": line[24:44].strip(),
             }
-            print(header)
         elif line[0:1] == "2":
             data = {
                 "record_type": line[0:1].strip(),
@@ -75,11 +99,18 @@ def main() -> None:
             }
             try:
                 data_forestwell = Forestwell(**data)
-                # print(data_forestwell)
+                dataset.append(data_forestwell)
+                if len(dataset) == NUMBER_OF_ROWS:
+                    save_dataset(dataset)
+                    dataset = []
+
             except InvalidRegistrationDateError as e:
+                # Don't do anything with this item
+                save_error(line)
                 # After an error: do this and continue with the next line
-                print(e.message)
-                print(line)
+                # print(e.message)
+                # Print only the first 80 characters of a line.
+                # print(line[:80])
         elif line[0:1] == "9":
             footer = {
                 "record_type": line[0:1].strip(),
@@ -88,7 +119,12 @@ def main() -> None:
                 "company": line[31:56].strip(),
                 "close_sign": line[56:57].strip(),
             }
-            print(footer)
+    # save the last dataset
+    if len(dataset) > 0:
+        save_dataset(dataset)
+    print(
+        f"End of the extract process: {datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')}"
+    )
 
 
 if __name__ == "__main__":

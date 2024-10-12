@@ -6,8 +6,8 @@ from typing import Any
 from faker import Faker
 
 
-NUMBER_OF_ROWS = 10
-FILE_NAME = "./data/input/testfile.txt"
+NUMBER_OF_ROWS = 1000
+FILE_NAME = "./data/input/testfile_2.txt"
 
 
 def make_fixed_lenght_field(input: Any, length: int) -> str:
@@ -74,13 +74,16 @@ def make_footer_record() -> str:
 
 def generate_file() -> None:
     """generates a file with 1 header, x detail records and 1 footer"""
-
+    print(f"Start of the process: {datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')}")
     with open(FILE_NAME, "w") as file:
         file.write(make_header_record() + "\n")
-        for _ in range(NUMBER_OF_ROWS):
+        for i in range(NUMBER_OF_ROWS):
             file.write(make_detail_record() + "\n")
+            if i % 100 == 0:
+                print(f"Number of rows already made: {i}")
         file.write(make_footer_record() + "\n")
     print(f"Job done: made {NUMBER_OF_ROWS} of detailrecords.")
+    print(f"End of the process: {datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')}")
 
 
 if __name__ == "__main__":
