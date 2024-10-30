@@ -9,6 +9,8 @@ dependencies:
   - pyyaml
   - snowflake-snowpark-python
   - pydantic
+  - duckdb
+  - gzip
   - pip
   - pip:
     - "snowflake-connector-python[secure-local-storage,pandas]"
